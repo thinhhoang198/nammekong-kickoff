@@ -1,0 +1,901 @@
+/* ============================================================
+   THEME: Nam Mekong Grand Plaza — Purple luxury
+   Màu nền tím sang trọng, điểm nhấn cam vàng #f79421
+   Brand: #64338c (purple), #f79421 (orange), #676266 (gray)
+   Body: Be Vietnam Pro | Display: Cormorant Garamond
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap');
+
+@font-face {
+  font-family: 'SVN-Gotham';
+  src: url('/fonts/SVN-Gotham Thin.otf') format('opentype');
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SVN-Gotham';
+  src: url('/fonts/SVN-Gotham XLight.otf') format('opentype');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SVN-Gotham';
+  src: url('/fonts/SVN-Gotham Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SVN-Gotham';
+  src: url('/fonts/SVN-Gotham Book.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SVN-Gotham';
+  src: url('/fonts/SVN-Gotham Italic.otf') format('opentype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SVN-Gotham';
+  src: url('/fonts/SVN-Gotham Regular.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SVN-Gotham';
+  src: url('/fonts/SVN-Gotham Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SVN-Gotham';
+  src: url('/fonts/SVN-Gotham Black.otf') format('opentype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SVN-Gotham';
+  src: url('/fonts/SVN-Gotham Ultra.otf') format('opentype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Be Vietnam Pro tự host cho canvas (weight 300 dùng ở field "Tên Đại lý").
+   Google Fonts CDN (@import phía trên) có lúc load chậm/không kịp trước khi
+   canvas vẽ -> chữ bị fallback sai font ở lần tạo đầu tiên. Đặt tên riêng
+   'Be Vietnam Pro Local' để canvas luôn dùng font load nhanh, ổn định,
+   không phụ thuộc race-condition với CDN ngoài. */
+@font-face {
+  font-family: 'Be Vietnam Pro Local';
+  src: url('/fonts/BeVietnamPro-Light-vietnamese.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1,
+    U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329,
+    U+1EA0-1EF9, U+20AB;
+}
+
+@font-face {
+  font-family: 'Be Vietnam Pro Local';
+  src: url('/fonts/BeVietnamPro-Light-latin.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Be Vietnam Pro Local';
+  src: url('/fonts/BeVietnamPro-ExtraLight-vietnamese.woff2') format('woff2');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1,
+    U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329,
+    U+1EA0-1EF9, U+20AB;
+}
+
+@font-face {
+  font-family: 'Be Vietnam Pro Local';
+  src: url('/fonts/BeVietnamPro-ExtraLight-latin.woff2') format('woff2');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Be Vietnam Pro Local';
+  src: url('/fonts/BeVietnamPro-Regular-vietnamese.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1,
+    U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329,
+    U+1EA0-1EF9, U+20AB;
+}
+
+@font-face {
+  font-family: 'Be Vietnam Pro Local';
+  src: url('/fonts/BeVietnamPro-Regular-latin.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+
+/* Font tên khách "Nhân xưng - Tên" cho sự kiện Đại lý — font script sang
+   trọng, chỉ có 1 weight (400). */
+@font-face {
+  font-family: '1FTV VIP Glasvia';
+  src: url('/fonts/1FTV-VIP-Glasvia.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* Brand palette */
+  --purple-deep: #200845;
+  --purple-brand: #64338c;
+  --purple-mid: #3d1468;
+  --purple-light: #7b3fa8;
+  --purple-pale: rgba(100, 51, 140, 0.18);
+
+  /* Orange / gold accents */
+  --orange: #f79421;
+  --orange-soft: #f9b05a;
+  --orange-pale: rgba(247, 148, 33, 0.15);
+  --orange-glow: rgba(247, 148, 33, 0.08);
+
+  /* Surfaces */
+  --surface: rgba(255, 255, 255, 0.06);
+  --surface-hover: rgba(255, 255, 255, 0.1);
+  --surface-input: rgba(255, 255, 255, 0.07);
+  --border: rgba(255, 255, 255, 0.14);
+  --border-focus: rgba(247, 148, 33, 0.6);
+
+  /* Text */
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.72);
+  --text-muted: rgba(255, 255, 255, 0.42);
+  --text-label: var(--orange-soft);
+
+  /* Misc */
+  --error: #ff7b6b;
+  --error-bg: rgba(255, 100, 80, 0.12);
+  --radius: 8px;
+  --radius-sm: 4px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+  background:
+    radial-gradient(
+      ellipse 80% 60% at 15% -5%,
+      rgba(100, 51, 140, 0.55) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 60% 50% at 90% 100%,
+      rgba(100, 51, 140, 0.35) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 40% 40% at 55% 50%,
+      rgba(247, 148, 33, 0.05) 0%,
+      transparent 60%
+    ),
+    linear-gradient(155deg, #2d0a55 0%, #1a0535 50%, #260840 100%);
+  background-attachment: fixed;
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Subtle noise texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.app {
+  position: relative;
+  z-index: 1;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: clamp(32px, 5vw, 64px) clamp(16px, 4vw, 40px) 100px;
+}
+
+/* ---------- Header ---------- */
+.masthead {
+  text-align: center;
+  padding-bottom: 48px;
+  margin-bottom: 52px;
+  position: relative;
+}
+
+.masthead::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 240px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--orange) 30%,
+    var(--orange) 70%,
+    transparent 100%
+  );
+  opacity: 0.5;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 200px;
+  margin: 0 auto 16px;
+  filter: drop-shadow(0 0 18px rgba(247, 148, 33, 0.3));
+}
+
+.masthead .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: var(--orange);
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.masthead .eyebrow::before,
+.masthead .eyebrow::after {
+  content: '';
+  width: 28px;
+  height: 1px;
+  background: var(--orange);
+  opacity: 0.6;
+}
+
+.masthead h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 700;
+  font-size: clamp(36px, 6.5vw, 64px);
+  line-height: 1.08;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+  text-shadow: 0 0 40px rgba(100, 51, 140, 0.6);
+}
+
+.masthead h1 em {
+  font-style: italic;
+  color: var(--orange-soft);
+}
+
+.masthead p {
+  color: var(--text-secondary);
+  font-size: 15px;
+  max-width: 480px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* ---------- Layout: form + preview ---------- */
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(24px, 4vw, 48px);
+  align-items: start;
+}
+
+@media (max-width: 820px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .preview {
+    position: static;
+  }
+
+  .masthead {
+    padding-bottom: 32px;
+    margin-bottom: 32px;
+  }
+}
+
+@media (max-width: 600px) {
+  .app {
+    padding: 20px 12px 48px;
+  }
+
+  .logo {
+    max-width: 140px;
+    margin-bottom: 12px;
+  }
+
+  .masthead {
+    padding-bottom: 20px;
+    margin-bottom: 16px;
+  }
+
+  .masthead .eyebrow {
+    font-size: 10px;
+    letter-spacing: 3px;
+    margin-bottom: 12px;
+  }
+
+  .masthead p {
+    font-size: 13px;
+  }
+
+  .layout {
+    gap: 16px;
+  }
+
+  .form-panel {
+    padding: 20px 16px;
+  }
+
+  .form-panel-title {
+    margin-bottom: 16px;
+  }
+
+  .field label {
+    font-size: 10px;
+  }
+
+  .field input,
+  .field select {
+    font-size: 14px;
+    padding: 11px 12px;
+  }
+
+  .field select {
+    background-position: right 12px center;
+    padding-right: 32px;
+  }
+
+  .btn {
+    font-size: 14px;
+  }
+
+  .preview-empty {
+    padding: 24px;
+  }
+
+  .preview::before {
+    display: none;
+  }
+
+  .btn {
+    padding: 13px 16px;
+  }
+}
+
+/* ---------- Glass panel wrapping the form ---------- */
+.form-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: clamp(24px, 3vw, 36px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.form-panel-title {
+  font-size: 11px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--orange);
+  font-weight: 600;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ---------- Form Fields ---------- */
+.field {
+  margin-bottom: 20px;
+}
+
+.field label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-label);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  background: rgba(30, 10, 60, 0.55);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  padding: 13px 14px;
+  font-size: 15px;
+  font-family: inherit;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    box-shadow 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-text-fill-color: var(--text-primary);
+}
+
+/* Custom caret for selects */
+.field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23f79421' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 38px;
+}
+
+.field input::placeholder {
+  color: var(--text-muted);
+  -webkit-text-fill-color: var(--text-muted);
+}
+
+.field input:focus,
+.field select:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  background: rgba(40, 15, 80, 0.7);
+  box-shadow: 0 0 0 3px rgba(247, 148, 33, 0.12);
+}
+
+.field select option {
+  background: #250850;
+  color: #ffffff;
+}
+
+.row-2 {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 12px;
+}
+
+/* ---------- Button ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 15px 20px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition:
+    transform 0.15s,
+    filter 0.2s,
+    box-shadow 0.2s;
+  margin-top: 8px;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn-primary {
+  background: linear-gradient(
+    135deg,
+    var(--orange) 0%,
+    var(--orange-soft) 100%
+  );
+  color: #1a0535;
+  font-weight: 700;
+  box-shadow:
+    0 4px 18px rgba(247, 148, 33, 0.3),
+    0 1px 0 rgba(255, 255, 255, 0.15) inset;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 6px 24px rgba(247, 148, 33, 0.45);
+}
+
+.btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  filter: none;
+  box-shadow: none;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.btn-ghost:hover {
+  background: var(--surface-hover);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: var(--text-primary);
+}
+
+.btn-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+/* ---------- Preview panel ---------- */
+.preview {
+  position: sticky;
+  top: 32px;
+}
+
+.preview-frame {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  aspect-ratio: 2480 / 3652;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.preview-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.preview-empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 40px;
+}
+
+.preview-empty .mark {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 64px;
+  color: rgba(100, 51, 140, 0.4);
+  line-height: 1;
+  margin-bottom: 16px;
+  text-shadow: 0 0 20px rgba(247, 148, 33, 0.3);
+}
+
+.preview-empty p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+.preview-caption {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 12px;
+  letter-spacing: 0.5px;
+}
+
+/* ---------- States ---------- */
+.notice {
+  font-size: 13px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  margin-top: 14px;
+}
+
+.notice-error {
+  background: var(--error-bg);
+  border: 1px solid rgba(255, 100, 80, 0.35);
+  color: var(--error);
+}
+
+.notice-warning {
+  background: rgba(255, 190, 70, 0.12);
+  border: 1px solid rgba(255, 190, 70, 0.4);
+  color: #e6a417;
+}
+
+/* Modal "nhấn giữ để lưu ảnh" — dùng cho trình duyệt in-app Zalo/Facebook */
+.save-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.save-modal-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  max-width: 420px;
+  width: 100%;
+}
+
+.save-modal-hint {
+  color: #fff;
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.save-modal-img {
+  max-width: 100%;
+  max-height: 70vh;
+  height: auto;
+  border-radius: var(--radius-sm);
+  /* cho phép nhấn giữ để lưu ảnh trên mobile */
+  -webkit-touch-callout: default;
+  touch-action: manipulation;
+}
+
+/* Modal chọn xử lý khi phát hiện tên/đại lý đã tồn tại trên Sheet */
+.duplicate-modal-inner {
+  background: rgba(35, 12, 65, 0.98);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  max-width: 460px;
+  width: 100%;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+.duplicate-modal-title {
+  font-size: 22px;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.duplicate-modal-hint {
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+  margin-bottom: 18px;
+}
+
+.duplicate-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 260px;
+  overflow-y: auto;
+  margin-bottom: 20px;
+}
+
+.duplicate-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 14px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
+}
+
+.duplicate-item:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.duplicate-item input[type='checkbox'] {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--orange);
+}
+
+.duplicate-btn-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 480px) {
+  .duplicate-btn-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(26, 5, 53, 0.35);
+  border-top-color: #1a0535;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- Decorative glow ring behind preview ---------- */
+.preview::before {
+  content: '';
+  position: absolute;
+  inset: -30px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(100, 51, 140, 0.2) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  border-radius: 50%;
+}
+
+/* ---------- Check-in QR page ---------- */
+.checkin-page {
+  max-width: 640px;
+}
+
+.checkin-log-panel {
+  margin-top: 24px;
+}
+
+.checkin-spinner {
+  display: inline-block;
+  vertical-align: middle;
+  border-top-color: var(--orange);
+  margin-right: 8px;
+}
+
+.checkin-result {
+  margin-top: 16px;
+  padding: 16px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.checkin-result-ok {
+  background: rgba(90, 200, 130, 0.12);
+  border-color: rgba(90, 200, 130, 0.4);
+  color: #6fe3a0;
+}
+
+.checkin-result-warn {
+  background: rgba(255, 190, 70, 0.12);
+  border-color: rgba(255, 190, 70, 0.4);
+  color: #e6a417;
+}
+
+.checkin-result-error {
+  background: var(--error-bg);
+  border-color: rgba(255, 100, 80, 0.35);
+  color: var(--error);
+}
+
+.checkin-result-name {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.checkin-result-meta {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.checkin-token {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.checkin-log-empty {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.checkin-log {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.checkin-log-item {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-input);
+  border: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.checkin-log-time {
+  flex: none;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.checkin-log-text {
+  color: var(--text-primary);
+}
+
+.checkin-log-item-error .checkin-log-text {
+  color: var(--error);
+}
+
+.checkin-log-item-warn .checkin-log-text {
+  color: #e6a417;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

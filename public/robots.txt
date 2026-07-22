@@ -1,0 +1,5 @@
+# Trang riêng tư — không cho công cụ tìm kiếm thu thập/index.
+# (Các bot mạng xã hội như Facebook/Zalo vẫn đọc được thẻ Open Graph
+#  khi người dùng dán link, nên ảnh preview chia sẻ vẫn hiển thị.)
+User-agent: *
+Disallow: /
