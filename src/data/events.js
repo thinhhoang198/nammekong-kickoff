@@ -156,7 +156,7 @@ export const EVENTS = {
         x: 690,
         y: 539,
         font: "400 30px 'SVN-Gotham'",
-        color: '#ffffff',
+        color: '#ffc5b8',
         align: 'center',
         maxWidth: 1150,
       },
