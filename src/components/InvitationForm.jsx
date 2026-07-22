@@ -65,8 +65,8 @@ export default function InvitationForm({ onGenerate, loading }) {
 
   const doGenerate = (formPayload) => {
     onGenerate(formPayload, () => {
-      // setEventKey('');
-      // setValues({});
+      setEventKey('');
+      setValues({});
     });
   };
 
