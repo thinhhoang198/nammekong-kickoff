@@ -20,21 +20,20 @@
  */
 
 // Dòng tiêu đề dùng chung cho MỌI tab sự kiện.
-var HEADERS = ['Thời gian', 'Danh xưng', 'Họ tên', 'Chức danh', 'Tên công ty', 'Sự kiện', 'Token', 'Trạng thái'];
+var HEADERS = ['Thời gian', 'Danh xưng', 'Họ tên', 'Số điện thoại', 'Chức danh', 'Tên công ty', 'Sự kiện', 'Token'];
 
 // Cột 1-indexed dùng để tra cứu khi kiểm tra trùng.
 var COL_TITLE = 2;
 var COL_FULLNAME = 3;
-var COL_POSITION = 4;
-var COL_COMPANY = 5;
-// Cột 7 = Token (mã QR check-in, xem src/utils/token.js) — chỉ ghi, không
+var COL_PHONE = 4;
+var COL_POSITION = 5;
+var COL_COMPANY = 6;
+// Cột 8 = Token (mã QR check-in, xem src/utils/token.js) — chỉ ghi, không
 // dùng để tra trùng.
-// Cột 8 = Trạng thái check-in — mặc định STATUS_PENDING khi tạo thiệp,
-// chuyển sang STATUS_CONFIRMED khi đội quét QR gọi action "checkin" với
-// đúng token (xem findAndConfirmToken bên dưới).
-var COL_STATUS = 8;
-
-var STATUS_PENDING = 'Chờ xác nhận';
+//
+// Đã bỏ cột "Trạng thái" (đánh dấu đã check-in) theo yêu cầu — check-in quét
+// QR (findAndConfirmToken bên dưới) vẫn chạy được, chỉ là không còn báo được
+// "đã check-in trước đó" nữa vì không còn nơi để lưu trạng thái đó.
 var STATUS_CONFIRMED = 'Đã xác nhận';
 
 // Mở URL bằng trình duyệt -> thấy dòng này = script sống.
@@ -45,8 +44,8 @@ function doGet() {
 // Nhận POST từ Vercel /api/lead (tạo/tra trùng lead) hoặc /api/checkin
 // (đội quét QR xác nhận check-in).
 // data.action: 'check' (tra trùng, không ghi) | 'update' (ghi đè dòng đã
-// chọn) | 'checkin' (quét QR, đổi Trạng thái -> Đã xác nhận) | mặc định =
-// tạo dòng mới.
+// chọn) | 'checkin' (quét QR — xem findAndConfirmToken) | mặc định = tạo
+// dòng mới.
 function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
@@ -73,11 +72,11 @@ function doPost(e) {
       data.time || new Date(),
       data.title || "",
       data.fullName || "",
+      data.phone || "",
       data.position || "",
       data.company || "",
       data.eventKey || "",
       data.token || "",
-      STATUS_PENDING,
     ];
 
     // Thay thế: tìm đúng dòng khớp với bản ghi cũ (matchRecord) rồi ghi đè.
@@ -122,6 +121,7 @@ function findMatches(ss, sheetName, matchField, matchValue) {
       matches.push({
         title: r[COL_TITLE - 1],
         fullName: r[COL_FULLNAME - 1],
+        phone: r[COL_PHONE - 1],
         position: r[COL_POSITION - 1],
         company: r[COL_COMPANY - 1],
       });
@@ -148,10 +148,13 @@ function findRowIndex(sheet, matchRecord) {
 }
 
 // Quét mọi tab tìm dòng có cột "Token" khớp giá trị token (không phân biệt
-// hoa/thường) -> đổi cột "Trạng thái" sang STATUS_CONFIRMED rồi trả về
-// thông tin khách để app quét QR hiển thị xác nhận trên màn hình.
+// hoa/thường) rồi trả về thông tin khách để app quét QR hiển thị xác nhận
+// trên màn hình.
 // Tra theo TÊN cột (không theo số cột cố định) để không vỡ nếu tab cũ
-// (tạo trước khi có cột Token/Trạng thái) có ít cột hơn.
+// (tạo trước khi có cột Token) có ít cột hơn, hoặc tab cũ vẫn còn cột
+// "Trạng thái" (đã bỏ khỏi HEADERS nhưng tab có sẵn từ trước vẫn giữ
+// nguyên cột đó) — nếu còn, vẫn cập nhật sang STATUS_CONFIRMED để không mất
+// dữ liệu đang theo dõi trên tab cũ.
 function findAndConfirmToken(ss, token) {
   var target = normalize(token);
   if (!target) return { found: false, error: 'Thiếu token' };
@@ -186,6 +189,7 @@ function findAndConfirmToken(ss, token) {
         sheet: sheet.getName(),
         title: col('Danh xưng'),
         fullName: col('Họ tên'),
+        phone: col('Số điện thoại'),
         position: col('Chức danh'),
         company: col('Tên công ty'),
         eventKey: col('Sự kiện'),

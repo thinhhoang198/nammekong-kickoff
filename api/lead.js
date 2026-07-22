@@ -60,7 +60,7 @@ export default async function handler(req, res) {
     }
 
     // --- Tạo mới hoặc thay thế (ghi vào Sheet) ---
-    const { title, fullName, position, company, token, eventKey, eventLabel, matchRecord } = body;
+    const { title, fullName, phone, position, company, token, eventKey, eventLabel, matchRecord } = body;
 
     // Validate tối thiểu. Mỗi event có form khác nhau nên KHÔNG bắt buộc
     // fullName — chỉ cần eventKey + ít nhất 1 trường định danh (tên người
@@ -81,6 +81,7 @@ export default async function handler(req, res) {
         }),
         title: title || '',
         fullName: fullName || '',
+        phone: phone || '',
         position: position || '',
         company: company || '',
         token: token || '',

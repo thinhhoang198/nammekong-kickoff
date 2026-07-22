@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import InvitationForm from './components/InvitationForm';
-import PreviewPanel from './components/PreviewPanel';
+import CardModal from './components/CardModal';
 import { EVENTS } from './data/events';
 import { renderInvitation } from './utils/canvas';
 import { saveLead } from './utils/api';
@@ -57,7 +57,6 @@ export default function App() {
         alt="Logo Nam Mekong Grand Plaza"
       />
       <header className="masthead">
-        <span className="eyebrow">Nam Mekong Grand Plaza · Digital Card</span>
         <h1>
           <em>Tạo thiệp online</em>
         </h1>
@@ -71,13 +70,13 @@ export default function App() {
         <div className="form-panel">
           <div className="form-panel-title">Thông tin Thiệp Online</div>
           <InvitationForm onGenerate={handleGenerate} loading={loading} />
+          {error && <div className="notice notice-error">{error}</div>}
         </div>
-        <PreviewPanel
-          imageUrl={imageUrl}
-          error={error}
-          onReset={() => setImageUrl(null)}
-        />
       </div>
+
+      {imageUrl && (
+        <CardModal imageUrl={imageUrl} onReset={() => setImageUrl(null)} />
+      )}
     </div>
   );
 }

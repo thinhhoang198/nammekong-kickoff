@@ -34,21 +34,39 @@ export default function InvitationForm({ onGenerate, loading }) {
     setValues({});
   };
 
-  const update = (e) =>
-    setValues((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  const getInput = (name) =>
+    flattenInputs(event).find((input) => input.name === name);
 
-  // Hợp lệ khi đã chọn event và mọi input required đều có giá trị.
+  // Với input numeric (vd số điện thoại): chặn luôn ký tự không phải chữ số
+  // + cắt bớt nếu vượt maxLength ngay lúc gõ, đơn giản hơn validate lỗi sau
+  // khi submit.
+  const update = (e) => {
+    const { name, value } = e.target;
+    const input = getInput(name);
+    let clean = input?.numeric ? value.replace(/\D/g, '') : value;
+    if (input?.maxLength) clean = clean.slice(0, input.maxLength);
+    setValues((prev) => ({ ...prev, [name]: clean }));
+  };
+
+  // Hợp lệ khi đã chọn event và mọi input required đều có giá trị — riêng
+  // input có maxLength (vd số điện thoại 5 số cuối) phải gõ ĐỦ đúng số ký
+  // tự đó, không cho thiếu.
   const valid = useMemo(() => {
     if (!event) return false;
     return flattenInputs(event)
       .filter((input) => input.required)
-      .every((input) => (values[input.name] || '').trim());
+      .every((input) => {
+        const value = (values[input.name] || '').trim();
+        if (!value) return false;
+        if (input.maxLength) return value.length === input.maxLength;
+        return true;
+      });
   }, [event, values]);
 
   const doGenerate = (formPayload) => {
     onGenerate(formPayload, () => {
-      setEventKey('');
-      setValues({});
+      // setEventKey('');
+      // setValues({});
     });
   };
 
@@ -57,7 +75,9 @@ export default function InvitationForm({ onGenerate, loading }) {
     const formPayload = { eventKey, ...values };
 
     const identityField = getIdentityField(event);
-    const matchValue = identityField ? (values[identityField] || '').trim() : '';
+    const matchValue = identityField
+      ? (values[identityField] || '').trim()
+      : '';
 
     // Event nào không có field định danh (hiếm) thì bỏ qua bước tra trùng.
     if (!identityField || !matchValue) {
@@ -88,7 +108,11 @@ export default function InvitationForm({ onGenerate, loading }) {
   };
 
   const replaceDuplicate = (matchRecord) => {
-    const formPayload = { ...duplicate.formPayload, action: 'update', matchRecord };
+    const formPayload = {
+      ...duplicate.formPayload,
+      action: 'update',
+      matchRecord,
+    };
     setDuplicate(null);
     doGenerate(formPayload);
   };
@@ -139,6 +163,8 @@ export default function InvitationForm({ onGenerate, loading }) {
                     value={values[input.name] || ''}
                     onChange={update}
                     placeholder={input.placeholder}
+                    inputMode={input.inputMode}
+                    maxLength={input.maxLength}
                   />
                 ),
               )}

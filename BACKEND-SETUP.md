@@ -23,16 +23,14 @@ Làm theo đúng 3 phần dưới đây, khoảng 15–20 phút.
 2. Không cần tự kẻ tiêu đề: **mỗi sự kiện sẽ tự sinh ra một tab riêng** (đặt tên
    theo tên sự kiện) kèm dòng tiêu đề dưới đây ngay khi có lead đầu tiên của event đó.
 
-   | A         | B         | C      | D         | E            | F       | G     | H          |
-   | --------- | --------- | ------ | --------- | ------------ | ------- | ----- | ---------- |
-   | Thời gian | Danh xưng | Họ tên | Chức danh | Tên công ty | Sự kiện | Token | Trạng thái |
+   | A         | B         | C      | D             | E         | F           | G       | H     |
+   | --------- | --------- | ------ | ------------- | --------- | ----------- | ------- | ----- |
+   | Thời gian | Danh xưng | Họ tên | Số điện thoại | Chức danh | Tên công ty | Sự kiện | Token |
 
    > Vì vậy khi anh thêm 1 event mới trong `src/data/events.js`, **không cần đụng vào
    > Apps Script** — tab mới sẽ tự xuất hiện. Tab mặc định (Sheet1) có thể để trống.
    >
-   > Cột **Trạng thái** mặc định là `Chờ xác nhận` khi tạo thiệp. Khi đội quét QR
-   > quét mã trên thiệp (gọi `/api/checkin` — xem PHẦN 4), cột này tự đổi thành
-   > `Đã xác nhận`.
+   > Số điện thoại chỉ lưu trong Sheet để sale liên hệ — **không** in lên thiệp.
 
 ### Bước 1.2. Dán Apps Script
 
@@ -108,7 +106,7 @@ Nếu thiệp tạo được nhưng Sheet không có dòng mới, xem mục Xử
 Mỗi thiệp có 1 mã QR chứa **token** duy nhất của người đó (16 ký tự). Đội quét
 QR gọi API sau với token đọc được từ mã QR để xác nhận check-in — API tự tìm
 đúng người trên MỌI tab sự kiện (không cần biết trước người đó thuộc sự kiện
-nào) và đổi cột **Trạng thái** sang `Đã xác nhận`.
+nào).
 
 ```
 POST https://ten-app.vercel.app/api/checkin
@@ -120,9 +118,10 @@ Content-Type: application/json
 Kết quả:
 
 - **Tìm thấy** → `200 { ok: true, alreadyConfirmed: false, guest: { title, fullName, position, company, eventKey } }`.
-  Nếu người này đã được quét trước đó rồi, `alreadyConfirmed` sẽ là `true` (Trạng
-  thái vẫn giữ `Đã xác nhận`, không lỗi) — app quét nên hiển thị cảnh báo "đã
-  check-in trước đó" thay vì báo lỗi.
+  > Sheet hiện không còn cột "Trạng thái" nên `alreadyConfirmed` sẽ luôn là
+  > `false` — hệ thống không còn cảnh báo được "đã check-in trước đó" nữa
+  > (đã bỏ theo yêu cầu). Field vẫn được giữ trong response để không phá vỡ
+  > app quét QR đang đọc field này.
 - **Không tìm thấy token** → `404 { error: "Không tìm thấy token này" }`.
 
 App quét QR (Zalo Mini App, web app riêng, hay bất kỳ app nào đọc được QR) chỉ

@@ -56,103 +56,19 @@
 //     options    : mảng lựa chọn (bắt buộc khi type='select')
 //     placeholder: gợi ý trong ô nhập
 //     required   : true => bắt buộc nhập mới cho phép tạo thiệp
+//     numeric    : true => chỉ cho gõ chữ số (vd: số điện thoại)
+//     maxLength  : giới hạn số ký tự tối đa; nếu kèm required, phải gõ
+//                  ĐỦ đúng số ký tự này mới hợp lệ (không cho thiếu/thừa)
 //   }
 // ============================================================
 
 import { TITLES } from './agencies';
 
 export const EVENTS = {
-  // Vùng trống trong event1.png: y≈1000–1350 (350px dark navy)
-  // Toàn bộ text overlay đặt vào khu vực này.
-  // 'saban-08072026': {
-  //   label: 'Sự Kiện Ra Mắt Sa Bàn (08/07/2026)',
-  //   bgImage: '/assets/saban-event.jpg',
-  //   canvasSize: { width: 2480, height: 3720 },
-  //   form: [
-  //     {
-  //       label: 'Họ và tên',
-  //       inputs: [
-  //         {
-  //           name: 'title',
-  //           type: 'select',
-  //           options: TITLES,
-  //           placeholder: 'Danh xưng',
-  //           required: true,
-  //         },
-  //         {
-  //           name: 'fullName',
-  //           type: 'text',
-  //           placeholder: 'Nguyễn Văn A',
-  //           required: true,
-  //         },
-  //       ],
-  //     },
-  //     {
-  //       label: 'Chức danh',
-  //       inputs: [
-  //         {
-  //           name: 'position',
-  //           type: 'text',
-  //           placeholder: 'VD: Giám đốc Kinh doanh',
-  //           required: true,
-  //         },
-  //       ],
-  //     },
-  //     {
-  //       label: 'Tên công ty / Đại lý',
-  //       inputs: [
-  //         {
-  //           name: 'company',
-  //           type: 'text',
-  //           placeholder: 'VD: Nam Mekong Group',
-  //           required: true,
-  //         },
-  //       ],
-  //     },
-  //   ],
-  //   fields: {
-  //     fullName: {
-  //       from: ['title', 'fullName'],
-  //       uppercase: true,
-  //       x: 210,
-  //       y: 770,
-  //       font: "500 66px 'SVN-Gotham'",
-  //       color: '#f5b5ff',
-  //       align: 'left',
-  //       maxWidth: 1540,
-  //     },
-  //     position: {
-  //       from: ['position'],
-  //       x: 210,
-  //       y: 860,
-  //       font: "500 62px 'SVN-Gotham'",
-  //       color: '#f5b5ff',
-  //       align: 'left',
-  //       maxWidth: 1540,
-  //     },
-  //     company: {
-  //       from: ['company'],
-  //       x: 210,
-  //       y: 950,
-  //       font: "500 62px 'SVN-Gotham'",
-  //       color: '#f5b5ff',
-  //       align: 'left',
-  //       maxWidth: 1540,
-  //     },
-  //     qr: {
-  //       type: 'image',
-  //       src: '/assets/qr-code.png',
-  //       anchor: 'bottom-left',
-  //       size: 320,
-  //       marginX: 220,
-  //       marginY: 320,
-  //     },
-  //   },
-  // },
-  'daily-16072026': {
-    label: 'Sự Kiện Gặp Mặt Đại Lý (16/07/2026)',
-    bgImage: '/assets/dai-ly.png',
-    canvasSize: { width: 2480, height: 3652 },
+  'kickoff-300726': {
+    label: 'SỰ KIỆN KICK-OFF DỰ ÁN NAM MEKONG GRAND PLAZA',
+    bgImage: '/assets/kickoff.jpg',
+    canvasSize: { width: 2560, height: 2210 },
     form: [
       {
         label: 'Họ và tên',
@@ -168,6 +84,20 @@ export const EVENTS = {
             name: 'fullName',
             type: 'text',
             placeholder: 'Nguyễn Văn A',
+            required: true,
+          },
+        ],
+      },
+      {
+        label: 'Số điện thoại (5 số cuối)',
+        inputs: [
+          {
+            name: 'phone',
+            type: 'text',
+            inputMode: 'numeric',
+            numeric: true,
+            maxLength: 5,
+            placeholder: 'VD: 5 số cuối là 12345',
             required: true,
           },
         ],
@@ -195,191 +125,50 @@ export const EVENTS = {
         ],
       },
     ],
+    // Toạ độ đo trực tiếp trên kickoff.jpg (2560x2210): khối chữ khách mời
+    // nằm giữa 2 dòng tĩnh có sẵn trên nền "Trân trọng kính mời" (baseline
+    // ~y383) và "tới tham dự" (baseline ~y596), canh giữa cột trái (centerX 690).
+    // Không in số điện thoại lên thiệp — chỉ gửi kèm về Google Sheet.
     fields: {
-      // "Nhân xưng" + "Tên" trên cùng 1 dòng, canh baseline chung, mỗi
-      // đoạn cỡ chữ riêng (danh xưng nhỏ, tên to nổi bật).
       fullName: {
-        type: 'multi-text',
-        x: 1235,
-        y: 660,
+        from: ['title', 'fullName'],
+        uppercase: true,
+        x: 690,
+        y: 450,
+        font: "500 50px 'SVN-Gotham'",
+        color: '#ffc5b8',
         align: 'center',
-        gap: 36,
-        segments: [
-          {
-            from: ['title'],
-            font: "400 90px '1FTV VIP Glasvia'",
-            color: '#f7c978',
-          },
-          {
-            from: ['fullName'],
-            uppercase: true,
-            font: "500 142px '1FTV VIP Glasvia'",
-            color: '#f7c978',
-          },
-        ],
+        maxWidth: 1150,
       },
       position: {
         from: ['position'],
-        x: 1235,
-        y: 770,
-        font: "200 48px 'Be Vietnam Pro Local'",
-        color: '#ffffff',
-        align: 'center',
         uppercase: true,
-        maxWidth: 1540,
+        x: 690,
+        y: 498,
+        font: "400 30px 'SVN-Gotham'",
+        color: '#ffc5b8',
+        align: 'center',
+        maxWidth: 1150,
       },
       company: {
         from: ['company'],
-        x: 1235,
-        y: 870,
         uppercase: true,
-        font: "400 71px 'Be Vietnam Pro Local'",
-        color: '#f7c978',
-        align: 'center',
-        maxWidth: 1540,
-      },
-      text: {
-        label: '*Trang Phục: Lịch sự (tone Trắng, Đen, Kem)',
-        x: 175,
-        y: 3540,
-        font: "400 42px 'Be Vietnam Pro Local'",
-        color: '#ffffff',
-        align: 'left',
-        maxWidth: 2000,
-      },
-    },
-  },
-  // Sự kiện Test — nền tím theo theme dự án, form giống hệt "Gặp Mặt Đại
-  // Lý". Có thêm mã QR ĐỘNG ở dưới, value = token duy nhất sinh khi submit
-  // (xem src/utils/token.js + App.jsx) — dùng để check-in.
-  test: {
-    label: 'Test',
-    bgImage: '/assets/test-event.png',
-    canvasSize: { width: 2480, height: 3652 },
-    form: [
-      {
-        label: 'Họ và tên',
-        inputs: [
-          {
-            name: 'title',
-            type: 'select',
-            options: TITLES,
-            placeholder: 'Danh xưng',
-            required: true,
-          },
-          {
-            name: 'fullName',
-            type: 'text',
-            placeholder: 'Nguyễn Văn A',
-            required: true,
-          },
-        ],
-      },
-      {
-        label: 'Chức danh',
-        inputs: [
-          {
-            name: 'position',
-            type: 'text',
-            placeholder: 'VD: Giám đốc Kinh doanh',
-            required: true,
-          },
-        ],
-      },
-      {
-        label: 'Tên công ty / Đại lý',
-        inputs: [
-          {
-            name: 'company',
-            type: 'text',
-            placeholder: 'VD: Nam Mekong Group',
-            required: true,
-          },
-        ],
-      },
-    ],
-    fields: {
-      fullName: {
-        type: 'multi-text',
-        x: 1240,
-        y: 1850,
-        align: 'center',
-        gap: 30,
-        segments: [
-          {
-            from: ['title'],
-            font: "400 78px '1FTV VIP Glasvia'",
-            color: '#f7c978',
-          },
-          {
-            from: ['fullName'],
-            uppercase: true,
-            font: "500 128px '1FTV VIP Glasvia'",
-            color: '#f7c978',
-          },
-        ],
-      },
-      position: {
-        from: ['position'],
-        x: 1240,
-        y: 1960,
-        font: "200 46px 'Be Vietnam Pro Local'",
+        x: 690,
+        y: 539,
+        font: "400 30px 'SVN-Gotham'",
         color: '#ffffff',
         align: 'center',
-        uppercase: true,
-        maxWidth: 1900,
-      },
-      company: {
-        from: ['company'],
-        x: 1240,
-        y: 2080,
-        uppercase: true,
-        font: "400 64px 'Be Vietnam Pro Local'",
-        color: '#f7c978',
-        align: 'center',
-        maxWidth: 1900,
+        maxWidth: 1150,
       },
       qr: {
         type: 'qr',
         valueKey: 'token',
-        x: 1240,
-        y: 2540,
+        x: 1980,
+        y: 1706,
         align: 'center',
-        size: 440,
+        valign: 'center',
+        size: 330,
       },
     },
   },
-  // Thư cảm ơn — form CHỈ cần tên Đại lý (không danh xưng/chức danh).
-  // 'thu-camon-08072026': {
-  //   label: 'Thư Cảm Ơn (Sự Kiện Sa Bàn)',
-  //   bgImage: '/assets/thu-cam-on.jpg',
-  //   canvasSize: { width: 2480, height: 3720 },
-  //   form: [
-  //     {
-  //       label: 'Tên Đại lý',
-  //       inputs: [
-  //         {
-  //           name: 'company',
-  //           type: 'text',
-  //           placeholder: 'VD: Nam Mekong Group',
-  //           required: true,
-  //         },
-  //       ],
-  //     },
-  //   ],
-  //   fields: {
-  //     // TODO: chỉnh x, y, font, color, maxWidth cho khớp thiết kế thư cảm ơn.
-  //     // Hiện đặt tạm căn giữa theo chiều ngang của canvas 2480px (x = 1240).
-  //     company: {
-  //       from: ['company'],
-  //       // uppercase: true,
-  //       x: 995,
-  //       y: 788,
-  //       font: "300 56px 'Be Vietnam Pro Local'",
-  //       color: '#ffffff',
-  //       align: 'left',
-  //       maxWidth: 2000,
-  //     },
-  //   },
-  // },
 };
