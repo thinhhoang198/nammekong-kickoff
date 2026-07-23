@@ -169,7 +169,9 @@ function doPost(e) {
         data.time || new Date(),
         data.title || '',
         data.fullName || '',
-        data.phone || '',
+        // Dấu ' ép Sheets lưu dạng CHỮ — nếu không, số điện thoại bắt đầu
+        // bằng 0 (vd "01234") bị Sheets tự nhận là số rồi mất số 0 ở đầu.
+        data.phone ? "'" + data.phone : '',
         data.position || '',
         data.company || '',
         data.eventKey || '',
