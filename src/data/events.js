@@ -83,7 +83,7 @@ export const EVENTS = {
           {
             name: 'fullName',
             type: 'text',
-            placeholder: 'Nguyễn Văn A',
+            placeholder: 'NGUYỄN VĂN A',
             required: true,
           },
         ],
@@ -108,7 +108,7 @@ export const EVENTS = {
           {
             name: 'position',
             type: 'text',
-            placeholder: 'VD: Giám đốc Kinh doanh',
+            placeholder: 'VD: GIÁM ĐỐC KINH DOANH',
             required: true,
           },
         ],
@@ -119,7 +119,7 @@ export const EVENTS = {
           {
             name: 'company',
             type: 'text',
-            placeholder: 'VD: Nam Mekong Group',
+            placeholder: 'VD: NAM MEKONG GROUP',
             required: true,
           },
         ],

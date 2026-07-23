@@ -39,11 +39,15 @@ export default function InvitationForm({ onGenerate, loading }) {
 
   // Với input numeric (vd số điện thoại): chặn luôn ký tự không phải chữ số
   // + cắt bớt nếu vượt maxLength ngay lúc gõ, đơn giản hơn validate lỗi sau
-  // khi submit.
+  // khi submit. Với input dạng chữ tự do (không phải select): tự chuyển
+  // thành CHỮ HOA ngay lúc gõ, đồng bộ với cách các field này in lên thiệp
+  // và lưu vào Sheet.
   const update = (e) => {
     const { name, value } = e.target;
     const input = getInput(name);
-    let clean = input?.numeric ? value.replace(/\D/g, '') : value;
+    let clean = value;
+    if (input?.numeric) clean = clean.replace(/\D/g, '');
+    if (input?.type !== 'select') clean = clean.toUpperCase();
     if (input?.maxLength) clean = clean.slice(0, input.maxLength);
     setValues((prev) => ({ ...prev, [name]: clean }));
   };
