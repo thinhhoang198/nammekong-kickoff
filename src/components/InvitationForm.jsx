@@ -52,6 +52,17 @@ export default function InvitationForm({ onGenerate, loading }) {
     setValues((prev) => ({ ...prev, [name]: clean }));
   };
 
+  // Thông báo lỗi hiển thị ngay dưới ô nhập — chỉ hiện khi đã gõ (tránh làm
+  // phiền lúc ô còn trống/mới vào form) nhưng CHƯA đủ số ký tự bắt buộc.
+  const getInputError = (input) => {
+    if (!input?.maxLength) return null;
+    const value = (values[input.name] || '').trim();
+    if (!value || value.length === input.maxLength) return null;
+    return input.numeric
+      ? `Vui lòng nhập đúng ${input.maxLength} số.`
+      : `Vui lòng nhập đủ ${input.maxLength} ký tự.`;
+  };
+
   // Hợp lệ khi đã chọn event và mọi input required đều có giá trị — riêng
   // input có maxLength (vd số điện thoại 5 số cuối) phải gõ ĐỦ đúng số ký
   // tự đó, không cho thiếu.
@@ -147,31 +158,34 @@ export default function InvitationForm({ onGenerate, loading }) {
           <div className="field" key={i}>
             <label>{row.label}</label>
             <div className={row.inputs.length > 1 ? 'row-2' : undefined}>
-              {row.inputs.map((input) =>
-                input.type === 'select' ? (
-                  <select
-                    key={input.name}
-                    name={input.name}
-                    value={values[input.name] || ''}
-                    onChange={update}
-                  >
-                    <option value="">{input.placeholder || '— Chọn —'}</option>
-                    {(input.options || []).map((opt) => (
-                      <option key={opt}>{opt}</option>
-                    ))}
-                  </select>
-                ) : (
-                  <input
-                    key={input.name}
-                    name={input.name}
-                    value={values[input.name] || ''}
-                    onChange={update}
-                    placeholder={input.placeholder}
-                    inputMode={input.inputMode}
-                    maxLength={input.maxLength}
-                  />
-                ),
-              )}
+              {row.inputs.map((input) => (
+                <div key={input.name} className="field-input">
+                  {input.type === 'select' ? (
+                    <select
+                      name={input.name}
+                      value={values[input.name] || ''}
+                      onChange={update}
+                    >
+                      <option value="">{input.placeholder || '— Chọn —'}</option>
+                      {(input.options || []).map((opt) => (
+                        <option key={opt}>{opt}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      name={input.name}
+                      value={values[input.name] || ''}
+                      onChange={update}
+                      placeholder={input.placeholder}
+                      inputMode={input.inputMode}
+                      maxLength={input.maxLength}
+                    />
+                  )}
+                  {getInputError(input) && (
+                    <div className="field-error">{getInputError(input)}</div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         ))}

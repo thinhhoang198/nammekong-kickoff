@@ -45,8 +45,10 @@ Làm theo đúng 3 phần dưới đây, khoảng 15–20 phút.
    > đó nếu sửa tiếp, hoặc cho khách khác) ở lần tạo/sửa thiệp kế tiếp.
    >
    > **Trạng thái đồng bộ** — 1 trong 3 giá trị `Chờ xác nhận` / `Đã đồng bộ` /
-   > `Đồng bộ lỗi`. App chỉ ghi mặc định `Chờ xác nhận` lúc tạo dòng mới; việc
-   > đổi sang `Đã đồng bộ` hay `Đồng bộ lỗi` do anh (hoặc 1 công cụ khác như
+   > `Đồng bộ lỗi`. App ghi `Chờ xác nhận` lúc tạo dòng mới, và ĐẶT LẠI về
+   > `Chờ xác nhận` mỗi khi sửa thông tin 1 khách đã có (khác với Token/Lucky
+   > Number là khoá vĩnh viễn) — vì thông tin đổi thì cần đồng bộ lại. Việc đổi
+   > sang `Đã đồng bộ` hay `Đồng bộ lỗi` do anh (hoặc 1 công cụ khác như
    > Zapier/n8n/CRM) tự cập nhật bên ngoài — app không tự đổi 2 trạng thái này.
    > Cột này KHÔNG in lên thiệp. (Lưu ý: cột này CỐ Ý đặt tên khác cột "Trạng
    > thái" check-in cũ đã bỏ, để không bị đội quét QR ghi đè nhầm khi check-in.)

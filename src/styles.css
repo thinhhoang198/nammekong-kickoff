@@ -488,6 +488,17 @@ body::before {
   gap: 12px;
 }
 
+.field-input {
+  min-width: 0;
+}
+
+.field-error {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--error);
+}
+
 /* ---------- Button ---------- */
 .btn {
   display: inline-flex;

@@ -4,7 +4,8 @@ import { createPortal } from 'react-dom';
 /** Ghép các phần khác rỗng của 1 bản ghi trùng thành 1 dòng mô tả dễ đọc. */
 function describeMatch(m) {
   const namePart = [m.title, m.fullName].filter(Boolean).join(' ').trim();
-  return [namePart, m.position, m.company].filter(Boolean).join(' — ');
+  const phonePart = m.phone ? `SĐT: ${m.phone}` : null;
+  return [namePart, phonePart, m.position, m.company].filter(Boolean).join(' — ');
 }
 
 export default function DuplicateModal({ matches, onReplace, onCreateNew, onCancel }) {

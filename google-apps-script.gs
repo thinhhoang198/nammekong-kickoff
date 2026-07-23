@@ -20,7 +20,18 @@
  */
 
 // Dòng tiêu đề dùng chung cho MỌI tab sự kiện.
-var HEADERS = ['Thời gian', 'Danh xưng', 'Họ tên', 'Số điện thoại', 'Chức danh', 'Tên công ty', 'Sự kiện', 'Token', 'Lucky Number', 'Trạng thái đồng bộ'];
+var HEADERS = [
+  'Thời gian',
+  'Danh xưng',
+  'Họ tên',
+  'Số điện thoại',
+  'Chức danh',
+  'Tên công ty',
+  'Sự kiện',
+  'Token',
+  'Lucky Number',
+  'Trạng thái đồng bộ',
+];
 
 // Cột 1-indexed dùng để tra cứu khi kiểm tra trùng.
 var COL_TITLE = 2;
@@ -62,18 +73,18 @@ var LUCKY_MAX = 9999;
 // "Trạng thái", không khớp "Trạng thái đồng bộ" nên an toàn).
 //
 // 3 giá trị: "Chờ xác nhận" | "Đã đồng bộ" | "Đồng bộ lỗi". App CHỈ ghi giá
-// trị mặc định "Chờ xác nhận" lúc tạo dòng mới — việc đổi sang "Đã đồng bộ"
-// / "Đồng bộ lỗi" do một công cụ/quy trình khác bên ngoài cập nhật (app
-// không tự đổi 2 trạng thái này). Giữ NGUYÊN khi sửa thông tin khách đã có
-// (cùng quy tắc với Token/Lucky Number) — sửa 1 vài trường không tự ý coi
-// như "phải đồng bộ lại". Nếu ô này bị admin xoá tay -> coi như chưa có,
-// cấp lại "Chờ xác nhận" ở lần sửa tiếp theo. Field này KHÔNG in lên thiệp.
+// trị "Chờ xác nhận" — lúc tạo dòng mới, và CẢ lúc sửa thông tin 1 khách đã
+// có (khác với Token/Lucky Number là khoá vĩnh viễn): sửa thông tin coi như
+// dữ liệu đã đổi, cần đồng bộ lại, nên luôn đặt lại về "Chờ xác nhận" thay
+// vì giữ trạng thái cũ. Việc đổi sang "Đã đồng bộ" / "Đồng bộ lỗi" do một
+// công cụ/quy trình khác bên ngoài cập nhật (app không tự đổi 2 trạng thái
+// này). Field này KHÔNG in lên thiệp.
 var COL_SYNC = 10;
 var SYNC_STATUS_PENDING = 'Chờ xác nhận';
 
 // Mở URL bằng trình duyệt -> thấy dòng này = script sống.
 function doGet() {
-  return ContentService.createTextOutput("Lead webhook OK");
+  return ContentService.createTextOutput('Lead webhook OK');
 }
 
 // Nhận POST từ Vercel /api/lead (tạo/tra trùng lead) hoặc /api/checkin
@@ -93,7 +104,9 @@ function doPost(e) {
       return jsonOutput(Object.assign({ ok: true }, result));
     }
 
-    var sheetName = sanitizeSheetName(data.eventLabel || data.eventKey || 'Khác');
+    var sheetName = sanitizeSheetName(
+      data.eventLabel || data.eventKey || 'Khác',
+    );
 
     if (data.action === 'check') {
       return jsonOutput({
@@ -118,16 +131,16 @@ function doPost(e) {
       var rowIndex = null;
       var existingToken = '';
       var existingLucky = '';
-      var existingSync = '';
       if (data.action === 'update' && data.matchRecord) {
         rowIndex = findRowIndex(sheet, data.matchRecord);
         if (rowIndex) {
-          var existingRow = sheet.getRange(rowIndex, 1, 1, HEADERS.length).getValues()[0];
+          var existingRow = sheet
+            .getRange(rowIndex, 1, 1, HEADERS.length)
+            .getValues()[0];
           // Chỉ trim, KHÔNG dùng normalize() (sẽ lowercase) — Token cần giữ
           // nguyên dạng chữ HOA gốc khi ghi lại / vẽ lại lên thiệp.
           existingToken = String(existingRow[COL_TOKEN - 1] || '').trim();
           existingLucky = String(existingRow[COL_LUCKY - 1] || '').trim();
-          existingSync = String(existingRow[COL_SYNC - 1] || '').trim();
           // Phòng trường hợp ô Lucky Number lỡ bị lưu thành SỐ (mất số 0 ở
           // đầu, vd "7" thay vì "0007") — vd người dùng tự gõ tay sửa lại.
           if (existingLucky && /^\d+$/.test(existingLucky)) {
@@ -146,24 +159,25 @@ function doPost(e) {
       // cho người khác.
       var luckyNumber = existingLucky || generateUniqueLuckyNumber(sheet);
 
-      // Trạng thái đồng bộ: giữ nguyên nếu dòng cũ đang có (vd đã được 1 quy
-      // trình bên ngoài đánh dấu "Đã đồng bộ" — sửa vài trường không tự ý
-      // coi như phải đồng bộ lại); nếu trống thì đặt mặc định "Chờ xác nhận".
-      var syncStatus = existingSync || SYNC_STATUS_PENDING;
+      // Trạng thái đồng bộ: LUÔN đặt lại "Chờ xác nhận" mỗi lần ghi dòng — kể
+      // cả khi chỉ sửa thông tin 1 khách đã có (khác Token/Lucky Number là
+      // giữ nguyên) — vì thông tin đã đổi thì cần công cụ bên ngoài đồng bộ
+      // lại, không được coi như vẫn đang giữ trạng thái đồng bộ cũ.
+      var syncStatus = SYNC_STATUS_PENDING;
 
       var row = [
         data.time || new Date(),
-        data.title || "",
-        data.fullName || "",
-        data.phone || "",
-        data.position || "",
-        data.company || "",
-        data.eventKey || "",
+        data.title || '',
+        data.fullName || '',
+        data.phone || '',
+        data.position || '',
+        data.company || '',
+        data.eventKey || '',
         token,
         // Dấu ' phía trước ép Sheets lưu dạng CHỮ (Plain text) — nếu không,
         // Sheets tự nhận "0001" là số rồi bỏ số 0 ở đầu thành 1, sai định
         // dạng 4 chữ số và làm lệch việc so khớp số đã cấp ở lần sau.
-        luckyNumber ? "'" + luckyNumber : "",
+        luckyNumber ? "'" + luckyNumber : '',
         syncStatus,
       ];
 
@@ -173,11 +187,23 @@ function doPost(e) {
       // Token/Lucky Number ở trên đã tự rơi về nhánh "cấp mới" cho đúng).
       if (rowIndex) {
         sheet.getRange(rowIndex, 1, 1, row.length).setValues([row]);
-        return jsonOutput({ ok: true, sheet: sheetName, replaced: true, token: token, luckyNumber: luckyNumber });
+        return jsonOutput({
+          ok: true,
+          sheet: sheetName,
+          replaced: true,
+          token: token,
+          luckyNumber: luckyNumber,
+        });
       }
 
       sheet.appendRow(row);
-      return jsonOutput({ ok: true, sheet: sheetName, replaced: false, token: token, luckyNumber: luckyNumber });
+      return jsonOutput({
+        ok: true,
+        sheet: sheetName,
+        replaced: false,
+        token: token,
+        luckyNumber: luckyNumber,
+      });
     } finally {
       lock.releaseLock();
     }
@@ -202,7 +228,8 @@ function generateUniqueLuckyNumber(sheet) {
   }
 
   for (var attempt = 0; attempt < 200; attempt++) {
-    var candidate = LUCKY_MIN + Math.floor(Math.random() * (LUCKY_MAX - LUCKY_MIN + 1));
+    var candidate =
+      LUCKY_MIN + Math.floor(Math.random() * (LUCKY_MAX - LUCKY_MIN + 1));
     if (!used[candidate]) return padLuckyNumber(candidate);
   }
   for (var n2 = LUCKY_MIN; n2 <= LUCKY_MAX; n2++) {
@@ -216,9 +243,9 @@ function padLuckyNumber(n) {
 }
 
 function jsonOutput(obj) {
-  return ContentService
-    .createTextOutput(JSON.stringify(obj))
-    .setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(
+    ContentService.MimeType.JSON,
+  );
 }
 
 // Tìm mọi dòng trong tab sự kiện có matchField (fullName|company) trùng
@@ -233,7 +260,8 @@ function findMatches(ss, sheetName, matchField, matchValue) {
 
   var values = sheet.getDataRange().getValues();
   var matches = [];
-  for (var i = 1; i < values.length; i++) { // bỏ dòng tiêu đề
+  for (var i = 1; i < values.length; i++) {
+    // bỏ dòng tiêu đề
     var r = values[i];
     if (normalize(r[col - 1]) === target) {
       matches.push({
@@ -292,7 +320,8 @@ function findAndConfirmToken(ss, token) {
     for (var i = 1; i < values.length; i++) {
       if (normalize(values[i][tokenCol]) !== target) continue;
 
-      var alreadyConfirmed = statusCol !== -1 && values[i][statusCol] === STATUS_CONFIRMED;
+      var alreadyConfirmed =
+        statusCol !== -1 && values[i][statusCol] === STATUS_CONFIRMED;
       if (statusCol !== -1) {
         sheet.getRange(i + 1, statusCol + 1).setValue(STATUS_CONFIRMED);
       }
@@ -321,7 +350,9 @@ function findAndConfirmToken(ss, token) {
 }
 
 function normalize(v) {
-  return String(v === null || v === undefined ? '' : v).trim().toLowerCase();
+  return String(v === null || v === undefined ? '' : v)
+    .trim()
+    .toLowerCase();
 }
 
 // Lấy tab theo tên; nếu chưa có thì tạo mới + kẻ tiêu đề (in đậm, freeze).
@@ -338,7 +369,9 @@ function getOrCreateEventSheet(ss, name) {
 
 // Google Sheets cấm các ký tự : \ / ? * [ ] trong tên tab, và tối đa 100 ký tự.
 function sanitizeSheetName(name) {
-  var clean = String(name).replace(/[:\\\/?*\[\]]/g, '-').trim();
+  var clean = String(name)
+    .replace(/[:\\\/?*\[\]]/g, '-')
+    .trim();
   if (!clean) clean = 'Khác';
   return clean.substring(0, 100);
 }
