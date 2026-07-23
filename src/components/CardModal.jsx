@@ -64,7 +64,7 @@ export default function CardModal({ imageUrl, onReset }) {
 
         <div className="card-modal-actions">
           <button className="btn btn-primary" onClick={download}>
-            Tải ảnh về
+            Tải ảnh
           </button>
           <button className="btn btn-ghost" onClick={onReset}>
             Tạo lại
