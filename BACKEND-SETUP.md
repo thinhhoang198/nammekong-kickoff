@@ -23,9 +23,9 @@ Làm theo đúng 3 phần dưới đây, khoảng 15–20 phút.
 2. Không cần tự kẻ tiêu đề: **mỗi sự kiện sẽ tự sinh ra một tab riêng** (đặt tên
    theo tên sự kiện) kèm dòng tiêu đề dưới đây ngay khi có lead đầu tiên của event đó.
 
-   | A         | B         | C      | D             | E         | F           | G       | H     | I            |
-   | --------- | --------- | ------ | ------------- | --------- | ----------- | ------- | ----- | ------------ |
-   | Thời gian | Danh xưng | Họ tên | Số điện thoại | Chức danh | Tên công ty | Sự kiện | Token | Lucky Number |
+   | A         | B         | C      | D             | E         | F           | G       | H     | I            | J                  |
+   | --------- | --------- | ------ | ------------- | --------- | ----------- | ------- | ----- | ------------ | ------------------ |
+   | Thời gian | Danh xưng | Họ tên | Số điện thoại | Chức danh | Tên công ty | Sự kiện | Token | Lucky Number | Trạng thái đồng bộ |
 
    > Vì vậy khi anh thêm 1 event mới trong `src/data/events.js`, **không cần đụng vào
    > Apps Script** — tab mới sẽ tự xuất hiện. Tab mặc định (Sheet1) có thể để trống.
@@ -34,9 +34,22 @@ Làm theo đúng 3 phần dưới đây, khoảng 15–20 phút.
    >
    > **Lucky Number** (4 số, 0001-9999) do chính Apps Script cấp lúc ghi dòng —
    > luôn DUY NHẤT trong phạm vi tab của sự kiện đó (không trùng giữa các khách),
-   > dùng cho vòng quay may mắn. Số này CÓ in lên thiệp, ngay dưới mã QR. Nếu
-   > sửa/thay thế thông tin 1 khách đã có (tính năng tra trùng), khách đó vẫn giữ
-   > nguyên Lucky Number cũ, không bị cấp số mới.
+   > dùng cho vòng quay may mắn. Số này CÓ in lên thiệp, ngay dưới mã QR.
+   >
+   > **Token và Lucky Number đều bị khoá vĩnh viễn theo từng khách**: một khi đã
+   > cấp, sửa/thay thế thông tin của đúng khách đó (tính năng tra trùng) sẽ KHÔNG
+   > đổi 2 giá trị này — Apps Script luôn đọc lại dòng hiện tại trên Sheet (không
+   > tin dữ liệu cache từ trình duyệt) để quyết định. Nếu admin tự sửa Sheet tay —
+   > xoá riêng ô Token/Lucky Number hoặc xoá hẳn cả dòng của 1 khách — thì giá trị
+   > bị xoá đó coi như chưa từng cấp, và sẽ tự động được cấp lại (cho đúng khách
+   > đó nếu sửa tiếp, hoặc cho khách khác) ở lần tạo/sửa thiệp kế tiếp.
+   >
+   > **Trạng thái đồng bộ** — 1 trong 3 giá trị `Chờ xác nhận` / `Đã đồng bộ` /
+   > `Đồng bộ lỗi`. App chỉ ghi mặc định `Chờ xác nhận` lúc tạo dòng mới; việc
+   > đổi sang `Đã đồng bộ` hay `Đồng bộ lỗi` do anh (hoặc 1 công cụ khác như
+   > Zapier/n8n/CRM) tự cập nhật bên ngoài — app không tự đổi 2 trạng thái này.
+   > Cột này KHÔNG in lên thiệp. (Lưu ý: cột này CỐ Ý đặt tên khác cột "Trạng
+   > thái" check-in cũ đã bỏ, để không bị đội quét QR ghi đè nhầm khi check-in.)
 
 ### Bước 1.2. Dán Apps Script
 

@@ -20,7 +20,7 @@
  */
 
 // Dòng tiêu đề dùng chung cho MỌI tab sự kiện.
-var HEADERS = ['Thời gian', 'Danh xưng', 'Họ tên', 'Số điện thoại', 'Chức danh', 'Tên công ty', 'Sự kiện', 'Token', 'Lucky Number'];
+var HEADERS = ['Thời gian', 'Danh xưng', 'Họ tên', 'Số điện thoại', 'Chức danh', 'Tên công ty', 'Sự kiện', 'Token', 'Lucky Number', 'Trạng thái đồng bộ'];
 
 // Cột 1-indexed dùng để tra cứu khi kiểm tra trùng.
 var COL_TITLE = 2;
@@ -28,8 +28,10 @@ var COL_FULLNAME = 3;
 var COL_PHONE = 4;
 var COL_POSITION = 5;
 var COL_COMPANY = 6;
-// Cột 8 = Token (mã QR check-in, xem src/utils/token.js) — chỉ ghi, không
-// dùng để tra trùng.
+// Token (mã QR check-in, xem src/utils/token.js) — không dùng để tra trùng,
+// nhưng MỘT KHI đã cấp cho 1 khách thì khoá vĩnh viễn với khách đó (xem
+// doPost: sửa thông tin không được đổi Token/Lucky Number cũ).
+var COL_TOKEN = 8;
 //
 // Đã bỏ cột "Trạng thái" (đánh dấu đã check-in) theo yêu cầu — check-in quét
 // QR (findAndConfirmToken bên dưới) vẫn chạy được, chỉ là không còn báo được
@@ -39,9 +41,35 @@ var STATUS_CONFIRMED = 'Đã xác nhận';
 // Cột 9 = Lucky Number — số 4 chữ số (0001-9999) DUY NHẤT trong tab, dùng
 // cho vòng quay may mắn. Cấp số ở generateUniqueLuckyNumber() bên dưới, có
 // khoá (LockService) để 2 người tạo thiệp cùng lúc không bị cấp trùng số.
+//
+// QUY TẮC KHOÁ Token/Lucky Number: một khi đã cấp cho 1 khách (1 dòng trên
+// sheet) thì giữ NGUYÊN mãi mãi cho khách đó — sửa thông tin (action update)
+// KHÔNG được đổi 2 giá trị này. doPost() luôn đọc lại giá trị hiện tại
+// TRỰC TIẾP TỪ SHEET (không tin dữ liệu client cache gửi lên) để không bị
+// lệch nếu admin đã sửa sheet tay giữa lúc khách bấm "tạo thiệp" và lúc
+// submit thật sự. Nếu ô Token/Lucky Number của 1 dòng bị admin xoá tay (còn
+// trống) hoặc cả dòng bị xoá hẳn -> coi như "chưa từng cấp", sẽ cấp giá trị
+// MỚI ở lần tạo/sửa tiếp theo — tức giá trị cũ bị xoá sẽ tự động "trả lại"
+// cho lần cấp sau (vì generateUniqueLuckyNumber quét lại toàn bộ sheet mỗi
+// lần gọi, nên số nào không còn xuất hiện trong sheet coi như còn trống).
 var COL_LUCKY = 9;
 var LUCKY_MIN = 1;
 var LUCKY_MAX = 9999;
+
+// Cột 10 = Trạng thái đồng bộ — CỐ Ý đặt tên khác cột "Trạng thái" cũ (đã bỏ
+// ở trên, từng dùng cho check-in) để findAndConfirmToken() không lỡ ghi đè
+// nhầm lên cột này khi có người quét QR check-in (nó tìm cột theo đúng TÊN
+// "Trạng thái", không khớp "Trạng thái đồng bộ" nên an toàn).
+//
+// 3 giá trị: "Chờ xác nhận" | "Đã đồng bộ" | "Đồng bộ lỗi". App CHỈ ghi giá
+// trị mặc định "Chờ xác nhận" lúc tạo dòng mới — việc đổi sang "Đã đồng bộ"
+// / "Đồng bộ lỗi" do một công cụ/quy trình khác bên ngoài cập nhật (app
+// không tự đổi 2 trạng thái này). Giữ NGUYÊN khi sửa thông tin khách đã có
+// (cùng quy tắc với Token/Lucky Number) — sửa 1 vài trường không tự ý coi
+// như "phải đồng bộ lại". Nếu ô này bị admin xoá tay -> coi như chưa có,
+// cấp lại "Chờ xác nhận" ở lần sửa tiếp theo. Field này KHÔNG in lên thiệp.
+var COL_SYNC = 10;
+var SYNC_STATUS_PENDING = 'Chờ xác nhận';
 
 // Mở URL bằng trình duyệt -> thấy dòng này = script sống.
 function doGet() {
@@ -76,21 +104,52 @@ function doPost(e) {
 
     var sheet = getOrCreateEventSheet(ss, sheetName);
 
-    // Khoá toàn script trong lúc cấp Lucky Number + ghi dòng: nếu 2 người
-    // tạo thiệp cùng lúc, request thứ 2 phải đợi request thứ 1 ghi xong rồi
-    // mới đọc lại danh sách số đã cấp — nếu không, cả hai có thể đọc thấy
-    // cùng 1 số còn trống và cấp trùng nhau.
+    // Khoá toàn script trong lúc đọc/cấp Token + Lucky Number + ghi dòng: nếu
+    // 2 người tạo/sửa thiệp cùng lúc, request thứ 2 phải đợi request thứ 1
+    // ghi xong rồi mới đọc lại sheet — nếu không, cả hai có thể đọc thấy
+    // cùng 1 số Lucky Number còn trống và cấp trùng nhau.
     var lock = LockService.getScriptLock();
     lock.waitLock(30000);
     try {
-      var luckyNumber;
-      if (data.action === 'update' && data.matchRecord && data.matchRecord.luckyNumber) {
-        // Thay thế bản ghi cũ (sửa thông tin) của CÙNG một khách -> giữ
-        // nguyên Lucky Number đã cấp trước đó, không cấp số mới.
-        luckyNumber = data.matchRecord.luckyNumber;
-      } else {
-        luckyNumber = generateUniqueLuckyNumber(sheet);
+      // Nếu đang sửa 1 khách đã có dòng trên sheet -> tìm đúng dòng đó
+      // TRƯỚC, rồi đọc Token/Lucky Number HIỆN TẠI của chính dòng đó trực
+      // tiếp từ sheet (không dùng data.matchRecord do client cache) để luôn
+      // khớp với sheet thật, kể cả khi admin vừa sửa tay.
+      var rowIndex = null;
+      var existingToken = '';
+      var existingLucky = '';
+      var existingSync = '';
+      if (data.action === 'update' && data.matchRecord) {
+        rowIndex = findRowIndex(sheet, data.matchRecord);
+        if (rowIndex) {
+          var existingRow = sheet.getRange(rowIndex, 1, 1, HEADERS.length).getValues()[0];
+          // Chỉ trim, KHÔNG dùng normalize() (sẽ lowercase) — Token cần giữ
+          // nguyên dạng chữ HOA gốc khi ghi lại / vẽ lại lên thiệp.
+          existingToken = String(existingRow[COL_TOKEN - 1] || '').trim();
+          existingLucky = String(existingRow[COL_LUCKY - 1] || '').trim();
+          existingSync = String(existingRow[COL_SYNC - 1] || '').trim();
+          // Phòng trường hợp ô Lucky Number lỡ bị lưu thành SỐ (mất số 0 ở
+          // đầu, vd "7" thay vì "0007") — vd người dùng tự gõ tay sửa lại.
+          if (existingLucky && /^\d+$/.test(existingLucky)) {
+            existingLucky = padLuckyNumber(parseInt(existingLucky, 10));
+          }
+        }
       }
+
+      // Token: giữ nguyên nếu dòng cũ đang có; nếu trống (bị admin xoá tay,
+      // hoặc khách hoàn toàn mới) thì dùng token client vừa sinh.
+      var token = existingToken || data.token || '';
+
+      // Lucky Number: giữ nguyên nếu dòng cũ đang có; nếu trống (bị admin
+      // xoá tay, hoặc khách hoàn toàn mới) thì cấp số MỚI, duy nhất trong
+      // tab — số cũ (nếu có, đã bị xoá) coi như trả lại, có thể được cấp
+      // cho người khác.
+      var luckyNumber = existingLucky || generateUniqueLuckyNumber(sheet);
+
+      // Trạng thái đồng bộ: giữ nguyên nếu dòng cũ đang có (vd đã được 1 quy
+      // trình bên ngoài đánh dấu "Đã đồng bộ" — sửa vài trường không tự ý
+      // coi như phải đồng bộ lại); nếu trống thì đặt mặc định "Chờ xác nhận".
+      var syncStatus = existingSync || SYNC_STATUS_PENDING;
 
       var row = [
         data.time || new Date(),
@@ -100,26 +159,25 @@ function doPost(e) {
         data.position || "",
         data.company || "",
         data.eventKey || "",
-        data.token || "",
+        token,
         // Dấu ' phía trước ép Sheets lưu dạng CHỮ (Plain text) — nếu không,
         // Sheets tự nhận "0001" là số rồi bỏ số 0 ở đầu thành 1, sai định
         // dạng 4 chữ số và làm lệch việc so khớp số đã cấp ở lần sau.
         luckyNumber ? "'" + luckyNumber : "",
+        syncStatus,
       ];
 
-      // Thay thế: tìm đúng dòng khớp với bản ghi cũ (matchRecord) rồi ghi đè.
-      // Nếu không tìm thấy nữa (bị xoá/sửa giữa lúc check và submit) -> vẫn
-      // thêm dòng mới để không mất dữ liệu người dùng vừa nhập.
-      if (data.action === 'update' && data.matchRecord) {
-        var rowIndex = findRowIndex(sheet, data.matchRecord);
-        if (rowIndex) {
-          sheet.getRange(rowIndex, 1, 1, row.length).setValues([row]);
-          return jsonOutput({ ok: true, sheet: sheetName, replaced: true, luckyNumber: luckyNumber });
-        }
+      // rowIndex đã xác định ở trên (null nếu tạo mới, hoặc "update" nhưng
+      // dòng cũ không tìm thấy nữa — vd bị xoá/sửa giữa lúc check và submit
+      // -> vẫn thêm dòng mới để không mất dữ liệu người dùng vừa nhập, và
+      // Token/Lucky Number ở trên đã tự rơi về nhánh "cấp mới" cho đúng).
+      if (rowIndex) {
+        sheet.getRange(rowIndex, 1, 1, row.length).setValues([row]);
+        return jsonOutput({ ok: true, sheet: sheetName, replaced: true, token: token, luckyNumber: luckyNumber });
       }
 
       sheet.appendRow(row);
-      return jsonOutput({ ok: true, sheet: sheetName, replaced: false, luckyNumber: luckyNumber });
+      return jsonOutput({ ok: true, sheet: sheetName, replaced: false, token: token, luckyNumber: luckyNumber });
     } finally {
       lock.releaseLock();
     }

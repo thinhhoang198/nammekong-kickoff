@@ -18,34 +18,40 @@ export default function App() {
     try {
       const event = EVENTS[form.eventKey];
 
-      // Token duy nhất cho người này — vừa làm value cho mã QR trên
-      // thiệp (field type "qr" trong events.js), vừa lưu vào Sheet để
-      // đối soát lúc quét check-in.
-      const formWithToken = { ...form, token: generateToken() };
+      // Token & Lucky Number PHẢI khoá vĩnh viễn với đúng 1 khách: một khi đã
+      // cấp lần đầu, sửa thông tin sau này (action "update", khi tra trùng
+      // phát hiện khách đã có sẵn) không được đổi 2 giá trị này nữa. Chỉ
+      // Apps Script mới thấy được sheet thật (và admin có thể đã sửa tay) nên
+      // server luôn là nơi quyết định giá trị cuối cùng — client chỉ gửi 1
+      // token ỨNG VIÊN (dùng khi đây thực sự là khách mới), rồi PHẢI dùng lại
+      // giá trị server trả về để vẽ thiệp, không tự ý dùng token vừa sinh.
+      const candidateToken = generateToken();
 
-      // 1. Lưu lead vào Google Sheets TRƯỚC khi vẽ ảnh (khác thứ tự cũ):
-      //    Lucky Number (4 số, dùng cho vòng quay may mắn) phải DUY NHẤT
-      //    giữa mọi khách — chỉ Apps Script mới thấy được toàn bộ danh sách
-      //    đã cấp nên phải nhờ server cấp số rồi mới vẽ được lên thiệp.
-      //    Nếu đang "thay thế" 1 bản ghi trùng (action update), server sẽ tự
-      //    giữ nguyên Lucky Number cũ của người đó thay vì cấp số mới.
+      let token = candidateToken;
       let luckyNumber;
       try {
         // Gửi kèm eventLabel để backend đặt tên tab sheet cho dễ đọc.
-        const result = await saveLead({ ...formWithToken, eventLabel: event.label });
+        const result = await saveLead({
+          ...form,
+          token: candidateToken,
+          eventLabel: event.label,
+        });
+        if (result.token) token = result.token;
         luckyNumber = result.luckyNumber;
       } catch (e) {
-        // Backend chưa cấu hình / lỗi mạng -> vẫn cho tạo thiệp xem trước,
-        // chỉ là Lucky Number lúc này KHÔNG được đảm bảo không trùng.
-        console.warn('Chưa lưu được lead / cấp Lucky Number:', e.message);
+        // Backend chưa cấu hình / lỗi mạng -> vẫn cho tạo thiệp xem trước
+        // bằng token ứng viên + Lucky Number tạm, nhưng cả hai lúc này KHÔNG
+        // được đảm bảo khoá đúng khách cũ / không trùng người khác.
+        console.warn('Chưa lưu được lead / cấp Token-Lucky Number:', e.message);
       }
       if (!luckyNumber) luckyNumber = generateFallbackLuckyNumber();
 
-      // 2. Vẽ ảnh ở client (luôn chạy, kể cả không có backend).
-      //    luckyLabel dựng sẵn chuỗi hiển thị để field trong events.js chỉ
-      //    cần in thẳng ra, không phải ghép prefix tĩnh + giá trị động.
+      // Vẽ ảnh ở client (luôn chạy, kể cả không có backend).
+      // luckyLabel dựng sẵn chuỗi hiển thị để field trong events.js chỉ cần
+      // in thẳng ra, không phải ghép prefix tĩnh + giá trị động.
       const dataUrl = await renderInvitation(event, {
-        ...formWithToken,
+        ...form,
+        token,
         luckyNumber,
         luckyLabel: `Lucky Number: ${luckyNumber}`,
       });

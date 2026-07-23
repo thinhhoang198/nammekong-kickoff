@@ -104,9 +104,15 @@ export default async function handler(req, res) {
       throw new Error(data.error || 'Google Sheet từ chối ghi');
     }
 
-    // luckyNumber do Apps Script cấp (duy nhất trong tab) — trả về để app vẽ
-    // lên thiệp, xem src/App.jsx.
-    return res.status(200).json({ ok: true, luckyNumber: data.luckyNumber || '' });
+    // token/luckyNumber trả về là giá trị THẬT SỰ đã ghi vào Sheet — nếu đây
+    // là sửa 1 khách đã có, Apps Script tự khoá lại 2 giá trị cũ (xem
+    // google-apps-script.gs) nên có thể KHÁC với token client vừa gửi lên;
+    // app phải dùng giá trị trả về ở đây để vẽ thiệp, xem src/App.jsx.
+    return res.status(200).json({
+      ok: true,
+      token: data.token || '',
+      luckyNumber: data.luckyNumber || '',
+    });
   } catch (err) {
     console.error('Lưu lead lỗi:', err);
     return res
