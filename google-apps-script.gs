@@ -169,17 +169,12 @@ function doPost(e) {
         data.time || new Date(),
         data.title || '',
         data.fullName || '',
-        // Dấu ' ép Sheets lưu dạng CHỮ — nếu không, số điện thoại bắt đầu
-        // bằng 0 (vd "01234") bị Sheets tự nhận là số rồi mất số 0 ở đầu.
-        data.phone ? "'" + data.phone : '',
+        data.phone || '',
         data.position || '',
         data.company || '',
         data.eventKey || '',
         token,
-        // Dấu ' phía trước ép Sheets lưu dạng CHỮ (Plain text) — nếu không,
-        // Sheets tự nhận "0001" là số rồi bỏ số 0 ở đầu thành 1, sai định
-        // dạng 4 chữ số và làm lệch việc so khớp số đã cấp ở lần sau.
-        luckyNumber ? "'" + luckyNumber : '',
+        luckyNumber || '',
         syncStatus,
       ];
 
@@ -187,22 +182,23 @@ function doPost(e) {
       // dòng cũ không tìm thấy nữa — vd bị xoá/sửa giữa lúc check và submit
       // -> vẫn thêm dòng mới để không mất dữ liệu người dùng vừa nhập, và
       // Token/Lucky Number ở trên đã tự rơi về nhánh "cấp mới" cho đúng).
-      if (rowIndex) {
-        sheet.getRange(rowIndex, 1, 1, row.length).setValues([row]);
-        return jsonOutput({
-          ok: true,
-          sheet: sheetName,
-          replaced: true,
-          token: token,
-          luckyNumber: luckyNumber,
-        });
-      }
+      var targetRow = rowIndex || sheet.getLastRow() + 1;
 
-      sheet.appendRow(row);
+      // Ép cột Số điện thoại + Lucky Number sang định dạng CHỮ (Plain text)
+      // TRƯỚC khi ghi giá trị — nếu ghi giá trị rồi mới đổi định dạng thì số
+      // 0 ở đầu (vd "00120") đã bị Sheets tự cắt mất ngay lúc ghi, đổi định
+      // dạng sau không cứu lại được nữa. Dấu ' (apostrophe) chỉ có tác dụng
+      // khi NGƯỜI DÙNG tự gõ tay trên giao diện Sheets — ghi qua Apps Script
+      // API không tự hiểu quy ước đó, nên phải ép định dạng cột tường minh
+      // thế này mới chắc chắn giữ được số 0 ở đầu.
+      sheet.getRange(targetRow, COL_PHONE).setNumberFormat('@');
+      sheet.getRange(targetRow, COL_LUCKY).setNumberFormat('@');
+      sheet.getRange(targetRow, 1, 1, row.length).setValues([row]);
+
       return jsonOutput({
         ok: true,
         sheet: sheetName,
-        replaced: false,
+        replaced: !!rowIndex,
         token: token,
         luckyNumber: luckyNumber,
       });
