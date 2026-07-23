@@ -12,3 +12,16 @@ export function generateToken() {
       : `${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`;
   return raw.replace(/-/g, '').toUpperCase().slice(0, 16);
 }
+
+// ============================================================
+// Lucky Number (4 chữ số, 0001-9999) cho vòng quay may mắn — PHẢI duy nhất
+// giữa các khách mời. Việc cấp số THẬT (không trùng) do Google Apps Script
+// đảm nhận (xem google-apps-script.gs: generateUniqueLuckyNumber) vì chỉ
+// server mới thấy được toàn bộ danh sách đã cấp; hàm dưới đây CHỈ dùng làm
+// phương án dự phòng khi không gọi được backend (vd đang chạy dev cục bộ,
+// hoặc mất mạng) để app vẫn tạo được thiệp xem trước — số này KHÔNG đảm bảo
+// không trùng.
+// ============================================================
+export function generateFallbackLuckyNumber() {
+  return String(Math.floor(Math.random() * 9999) + 1).padStart(4, '0');
+}

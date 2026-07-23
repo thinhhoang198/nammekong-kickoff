@@ -164,10 +164,20 @@ export const EVENTS = {
         type: 'qr',
         valueKey: 'token',
         x: 1980,
-        y: 1706,
+        y: 1750,
         align: 'center',
         valign: 'center',
-        size: 330,
+        size: 350,
+      },
+      // Số quay số trúng thưởng — in ngay dưới mã QR (xem App.jsx: luckyLabel
+      // dựng sẵn "Lucky Number: XXXX", field ở đây chỉ in thẳng ra).
+      luckyNumber: {
+        from: ['luckyLabel'],
+        x: 1980,
+        y: 1540,
+        font: "500 36px 'SVN-Gotham'",
+        color: '#ffc5b8',
+        align: 'center',
       },
     },
   },

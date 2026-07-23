@@ -99,7 +99,14 @@ export default async function handler(req, res) {
       throw new Error(`Google Sheet từ chối ghi (${sheetRes.status})`);
     }
 
-    return res.status(200).json({ ok: true });
+    const data = await sheetRes.json().catch(() => ({}));
+    if (data.ok === false) {
+      throw new Error(data.error || 'Google Sheet từ chối ghi');
+    }
+
+    // luckyNumber do Apps Script cấp (duy nhất trong tab) — trả về để app vẽ
+    // lên thiệp, xem src/App.jsx.
+    return res.status(200).json({ ok: true, luckyNumber: data.luckyNumber || '' });
   } catch (err) {
     console.error('Lưu lead lỗi:', err);
     return res

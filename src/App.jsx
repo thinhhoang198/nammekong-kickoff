@@ -4,7 +4,7 @@ import CardModal from './components/CardModal';
 import { EVENTS } from './data/events';
 import { renderInvitation } from './utils/canvas';
 import { saveLead } from './utils/api';
-import { generateToken } from './utils/token';
+import { generateToken, generateFallbackLuckyNumber } from './utils/token';
 
 export default function App() {
   const [imageUrl, setImageUrl] = useState(null);
@@ -23,18 +23,33 @@ export default function App() {
       // đối soát lúc quét check-in.
       const formWithToken = { ...form, token: generateToken() };
 
-      // 1. Vẽ ảnh ở client (luôn chạy, kể cả không có backend)
-      const dataUrl = await renderInvitation(event, formWithToken);
-      setImageUrl(dataUrl);
-
-      // 2. Lưu lead vào Google Sheets (qua /api/lead).
-      //    Nếu backend chưa cấu hình -> bỏ qua, ảnh vẫn tải về được.
+      // 1. Lưu lead vào Google Sheets TRƯỚC khi vẽ ảnh (khác thứ tự cũ):
+      //    Lucky Number (4 số, dùng cho vòng quay may mắn) phải DUY NHẤT
+      //    giữa mọi khách — chỉ Apps Script mới thấy được toàn bộ danh sách
+      //    đã cấp nên phải nhờ server cấp số rồi mới vẽ được lên thiệp.
+      //    Nếu đang "thay thế" 1 bản ghi trùng (action update), server sẽ tự
+      //    giữ nguyên Lucky Number cũ của người đó thay vì cấp số mới.
+      let luckyNumber;
       try {
         // Gửi kèm eventLabel để backend đặt tên tab sheet cho dễ đọc.
-        await saveLead({ ...formWithToken, eventLabel: event.label });
+        const result = await saveLead({ ...formWithToken, eventLabel: event.label });
+        luckyNumber = result.luckyNumber;
       } catch (e) {
-        console.warn('Chưa lưu được lead:', e.message);
+        // Backend chưa cấu hình / lỗi mạng -> vẫn cho tạo thiệp xem trước,
+        // chỉ là Lucky Number lúc này KHÔNG được đảm bảo không trùng.
+        console.warn('Chưa lưu được lead / cấp Lucky Number:', e.message);
       }
+      if (!luckyNumber) luckyNumber = generateFallbackLuckyNumber();
+
+      // 2. Vẽ ảnh ở client (luôn chạy, kể cả không có backend).
+      //    luckyLabel dựng sẵn chuỗi hiển thị để field trong events.js chỉ
+      //    cần in thẳng ra, không phải ghép prefix tĩnh + giá trị động.
+      const dataUrl = await renderInvitation(event, {
+        ...formWithToken,
+        luckyNumber,
+        luckyLabel: `Lucky Number: ${luckyNumber}`,
+      });
+      setImageUrl(dataUrl);
     } catch (err) {
       setError(
         err.message ||

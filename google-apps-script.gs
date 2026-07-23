@@ -20,7 +20,7 @@
  */
 
 // Dòng tiêu đề dùng chung cho MỌI tab sự kiện.
-var HEADERS = ['Thời gian', 'Danh xưng', 'Họ tên', 'Số điện thoại', 'Chức danh', 'Tên công ty', 'Sự kiện', 'Token'];
+var HEADERS = ['Thời gian', 'Danh xưng', 'Họ tên', 'Số điện thoại', 'Chức danh', 'Tên công ty', 'Sự kiện', 'Token', 'Lucky Number'];
 
 // Cột 1-indexed dùng để tra cứu khi kiểm tra trùng.
 var COL_TITLE = 2;
@@ -35,6 +35,13 @@ var COL_COMPANY = 6;
 // QR (findAndConfirmToken bên dưới) vẫn chạy được, chỉ là không còn báo được
 // "đã check-in trước đó" nữa vì không còn nơi để lưu trạng thái đó.
 var STATUS_CONFIRMED = 'Đã xác nhận';
+
+// Cột 9 = Lucky Number — số 4 chữ số (0001-9999) DUY NHẤT trong tab, dùng
+// cho vòng quay may mắn. Cấp số ở generateUniqueLuckyNumber() bên dưới, có
+// khoá (LockService) để 2 người tạo thiệp cùng lúc không bị cấp trùng số.
+var COL_LUCKY = 9;
+var LUCKY_MIN = 1;
+var LUCKY_MAX = 9999;
 
 // Mở URL bằng trình duyệt -> thấy dòng này = script sống.
 function doGet() {
@@ -68,33 +75,86 @@ function doPost(e) {
     }
 
     var sheet = getOrCreateEventSheet(ss, sheetName);
-    var row = [
-      data.time || new Date(),
-      data.title || "",
-      data.fullName || "",
-      data.phone || "",
-      data.position || "",
-      data.company || "",
-      data.eventKey || "",
-      data.token || "",
-    ];
 
-    // Thay thế: tìm đúng dòng khớp với bản ghi cũ (matchRecord) rồi ghi đè.
-    // Nếu không tìm thấy nữa (bị xoá/sửa giữa lúc check và submit) -> vẫn
-    // thêm dòng mới để không mất dữ liệu người dùng vừa nhập.
-    if (data.action === 'update' && data.matchRecord) {
-      var rowIndex = findRowIndex(sheet, data.matchRecord);
-      if (rowIndex) {
-        sheet.getRange(rowIndex, 1, 1, row.length).setValues([row]);
-        return jsonOutput({ ok: true, sheet: sheetName, replaced: true });
+    // Khoá toàn script trong lúc cấp Lucky Number + ghi dòng: nếu 2 người
+    // tạo thiệp cùng lúc, request thứ 2 phải đợi request thứ 1 ghi xong rồi
+    // mới đọc lại danh sách số đã cấp — nếu không, cả hai có thể đọc thấy
+    // cùng 1 số còn trống và cấp trùng nhau.
+    var lock = LockService.getScriptLock();
+    lock.waitLock(30000);
+    try {
+      var luckyNumber;
+      if (data.action === 'update' && data.matchRecord && data.matchRecord.luckyNumber) {
+        // Thay thế bản ghi cũ (sửa thông tin) của CÙNG một khách -> giữ
+        // nguyên Lucky Number đã cấp trước đó, không cấp số mới.
+        luckyNumber = data.matchRecord.luckyNumber;
+      } else {
+        luckyNumber = generateUniqueLuckyNumber(sheet);
       }
-    }
 
-    sheet.appendRow(row);
-    return jsonOutput({ ok: true, sheet: sheetName, replaced: false });
+      var row = [
+        data.time || new Date(),
+        data.title || "",
+        data.fullName || "",
+        data.phone || "",
+        data.position || "",
+        data.company || "",
+        data.eventKey || "",
+        data.token || "",
+        // Dấu ' phía trước ép Sheets lưu dạng CHỮ (Plain text) — nếu không,
+        // Sheets tự nhận "0001" là số rồi bỏ số 0 ở đầu thành 1, sai định
+        // dạng 4 chữ số và làm lệch việc so khớp số đã cấp ở lần sau.
+        luckyNumber ? "'" + luckyNumber : "",
+      ];
+
+      // Thay thế: tìm đúng dòng khớp với bản ghi cũ (matchRecord) rồi ghi đè.
+      // Nếu không tìm thấy nữa (bị xoá/sửa giữa lúc check và submit) -> vẫn
+      // thêm dòng mới để không mất dữ liệu người dùng vừa nhập.
+      if (data.action === 'update' && data.matchRecord) {
+        var rowIndex = findRowIndex(sheet, data.matchRecord);
+        if (rowIndex) {
+          sheet.getRange(rowIndex, 1, 1, row.length).setValues([row]);
+          return jsonOutput({ ok: true, sheet: sheetName, replaced: true, luckyNumber: luckyNumber });
+        }
+      }
+
+      sheet.appendRow(row);
+      return jsonOutput({ ok: true, sheet: sheetName, replaced: false, luckyNumber: luckyNumber });
+    } finally {
+      lock.releaseLock();
+    }
   } catch (err) {
     return jsonOutput({ ok: false, error: String(err) });
   }
+}
+
+// Cấp 1 số 4 chữ số (dạng chuỗi "0001".."9999") CHƯA có trong cột Lucky
+// Number của tab này. Thử ngẫu nhiên vài chục lần trước (nhanh, đủ dùng khi
+// tab còn nhiều số trống); nếu tab gần đầy (hiếm khi nào tới 9999 khách một
+// sự kiện) mới rơi xuống quét tuần tự để chắc chắn tìm được số còn trống.
+function generateUniqueLuckyNumber(sheet) {
+  var values = sheet.getDataRange().getValues();
+  // So khớp theo GIÁ TRỊ SỐ (parseInt), không theo chuỗi "0001" — để không
+  // bị lệch nếu 1 ô nào đó lỡ bị Sheets lưu thành số (vd người dùng tự gõ
+  // tay sửa lại, mất số 0 ở đầu).
+  var used = {};
+  for (var i = 1; i < values.length; i++) {
+    var n = parseInt(values[i][COL_LUCKY - 1], 10);
+    if (!isNaN(n)) used[n] = true;
+  }
+
+  for (var attempt = 0; attempt < 200; attempt++) {
+    var candidate = LUCKY_MIN + Math.floor(Math.random() * (LUCKY_MAX - LUCKY_MIN + 1));
+    if (!used[candidate]) return padLuckyNumber(candidate);
+  }
+  for (var n2 = LUCKY_MIN; n2 <= LUCKY_MAX; n2++) {
+    if (!used[n2]) return padLuckyNumber(n2);
+  }
+  return ''; // đã cấp hết toàn bộ 9999 số trong tab này
+}
+
+function padLuckyNumber(n) {
+  return ('0000' + n).slice(-4);
 }
 
 function jsonOutput(obj) {
@@ -124,6 +184,7 @@ function findMatches(ss, sheetName, matchField, matchValue) {
         phone: r[COL_PHONE - 1],
         position: r[COL_POSITION - 1],
         company: r[COL_COMPANY - 1],
+        luckyNumber: r[COL_LUCKY - 1],
       });
     }
   }
@@ -193,6 +254,7 @@ function findAndConfirmToken(ss, token) {
         position: col('Chức danh'),
         company: col('Tên công ty'),
         eventKey: col('Sự kiện'),
+        luckyNumber: col('Lucky Number'),
       };
     }
   }

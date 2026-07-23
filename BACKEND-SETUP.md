@@ -23,14 +23,20 @@ Làm theo đúng 3 phần dưới đây, khoảng 15–20 phút.
 2. Không cần tự kẻ tiêu đề: **mỗi sự kiện sẽ tự sinh ra một tab riêng** (đặt tên
    theo tên sự kiện) kèm dòng tiêu đề dưới đây ngay khi có lead đầu tiên của event đó.
 
-   | A         | B         | C      | D             | E         | F           | G       | H     |
-   | --------- | --------- | ------ | ------------- | --------- | ----------- | ------- | ----- |
-   | Thời gian | Danh xưng | Họ tên | Số điện thoại | Chức danh | Tên công ty | Sự kiện | Token |
+   | A         | B         | C      | D             | E         | F           | G       | H     | I            |
+   | --------- | --------- | ------ | ------------- | --------- | ----------- | ------- | ----- | ------------ |
+   | Thời gian | Danh xưng | Họ tên | Số điện thoại | Chức danh | Tên công ty | Sự kiện | Token | Lucky Number |
 
    > Vì vậy khi anh thêm 1 event mới trong `src/data/events.js`, **không cần đụng vào
    > Apps Script** — tab mới sẽ tự xuất hiện. Tab mặc định (Sheet1) có thể để trống.
    >
    > Số điện thoại chỉ lưu trong Sheet để sale liên hệ — **không** in lên thiệp.
+   >
+   > **Lucky Number** (4 số, 0001-9999) do chính Apps Script cấp lúc ghi dòng —
+   > luôn DUY NHẤT trong phạm vi tab của sự kiện đó (không trùng giữa các khách),
+   > dùng cho vòng quay may mắn. Số này CÓ in lên thiệp, ngay dưới mã QR. Nếu
+   > sửa/thay thế thông tin 1 khách đã có (tính năng tra trùng), khách đó vẫn giữ
+   > nguyên Lucky Number cũ, không bị cấp số mới.
 
 ### Bước 1.2. Dán Apps Script
 
